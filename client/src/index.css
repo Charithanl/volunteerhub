@@ -1,0 +1,216 @@
+@import "tailwindcss";
+
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+button, a {
+  transition: all 0.2s ease;
+}
+
+input, textarea, select {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Light mode (default) */
+:root {
+  color-scheme: light;
+}
+
+body {
+  background-color: #ffffff;
+  color: #1f2937;
+}
+
+.topbar {
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
+}
+
+.nav-links a {
+  color: #6b7280;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  background-color: #f3f4f6;
+  color: #1a6fc4;
+}
+
+.card,
+.action-card {
+  background-color: #ffffff;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+}
+
+.card h3,
+.card h4 {
+  color: #111827;
+}
+
+input,
+textarea,
+select {
+  background-color: #ffffff;
+  color: #1f2937;
+  border-color: #e5e7eb;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af;
+}
+
+.form-label,
+.info-lbl,
+.filter-label {
+  color: #4b5563;
+}
+
+/* Button contrast */
+button {
+  transition: all 0.2s ease;
+}
+
+.btn-apply,
+.btn-primary,
+.save-btn {
+  color: #ffffff;
+  background-color: #3b82f6;
+}
+
+.btn-apply:hover,
+.btn-primary:hover,
+.save-btn:hover {
+  background-color: #2563eb;
+}
+
+.btn-save,
+.card-edit-btn {
+  color: #3b82f6;
+  border-color: #e5e7eb;
+}
+
+.danger-btn {
+  color: #dc2626;
+  border-color: #fee2e2;
+}
+
+.danger-btn:hover {
+  background-color: #fee2e2;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #111827;
+}
+
+.section-head h3 {
+  color: #111827;
+}
+
+.stat-card {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+
+.stat-info .val {
+  color: #111827;
+}
+
+.stat-info .lbl {
+  color: #6b7280;
+}
+
+p, span {
+  color: #1f2937;
+}
+
+/* Disabled button states */
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.breadcrumb {
+  color: #6b7280;
+}
+
+.breadcrumb a {
+  color: #2563eb;
+}
+
+.breadcrumb span {
+  color: #9ca3af;
+}
+
+/* Event/Application cards */
+.event-card,
+.app-card {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+
+.event-card h4,
+.app-card h4 {
+  color: #111827;
+}
+
+.event-card p,
+.app-card p {
+  color: #6b7280;
+}
+
+/* Filter and search styling */
+.ftab {
+  color: #6b7280;
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+}
+
+.ftab:hover {
+  background-color: #e5e7eb;
+  color: #1f2937;
+}
+
+.ftab.active {
+  background-color: #3b82f6;
+  color: #ffffff;
+  border-color: #3b82f6;
+}
+
+/* Topbar and nav improvements */
+.notif-btn {
+  color: #6b7280;
+  border-color: #e5e7eb;
+  background-color: #ffffff;
+}
+
+.notif-btn:hover {
+  background-color: #f3f4f6;
+  color: #2563eb;
+}
+
+.avatar {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+/* Hero and banner sections */
+.hero-card {
+  background-color: #f9fafb;
+}
+
+.hero-banner {
+  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+}
+
+/* Links and anchors */
+a {
+  color: #2563eb;
+}
+
+a:hover {
+  color: #1d4ed8;
+}

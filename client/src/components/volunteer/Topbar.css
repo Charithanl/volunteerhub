@@ -1,0 +1,42 @@
+.topbar { background: #fff; border-radius: 14px; padding: 0.85rem 1.5rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 1rem; }
+.brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
+.brand-dot { width: 32px; height: 32px; border-radius: 9px; background: #1a6fc4; display: flex; align-items: center; justify-content: center; }
+.brand-dot svg { width: 18px; height: 18px; fill: #fff; }
+.brand-name { font-size: 15px; font-weight: 600; color: #1a1a2e; }
+.nav-links a { font-size: 13px; padding: 6px 12px; border-radius: 7px; color: #6b7280; text-decoration: none; margin-right: 0.35rem; font-weight: 500; }
+.nav-links a.active, .nav-links a:hover { background: #e6f1fb; color: #1a6fc4; }
+.nav-history { display: none; align-items: center; gap: 0.35rem; margin-right: 0.5rem; }
+.history-btn { width: 30px; height: 30px; border: 1px solid #dbeafe; background: #e6f1fb; color: #1a6fc4; border-radius: 8px; font-weight: 700; cursor: pointer; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.notif-btn { width: 34px; height: 34px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+.notif-badge { position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; border-radius: 50%; background: #ef4444; border: 1.5px solid #fff; }
+.avatar,
+.avatar-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #1a6fc4;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+}
+
+.avatar-btn {
+  padding: 0;
+}
+
+.hamburger { background: transparent; border: none; cursor: pointer; color: #6b7280; }
+.mobile-menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; z-index: 999; }
+.mobile-menu { width: 260px; background: #fff; padding: 1rem; box-shadow: 2px 0 12px rgba(0,0,0,0.2); }
+.mobile-menu-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.mobile-menu-header button { border: none; background: transparent; font-size: 1.25rem; cursor: pointer; }
+.mobile-nav a { display: block; padding: 10px 10px; border-radius: 8px; color: #374151; font-weight: 600; text-decoration: none; margin-bottom: 6px; }
+.mobile-nav a.active, .mobile-nav a:hover { background: #e6f1fb; color: #1a6fc4; }
+@media (min-width: 768px) { .mobile-menu-overlay { display: none; } .nav-history { display: none; } }
+
+@media (max-width: 767px) { .nav-history { display: flex; } }

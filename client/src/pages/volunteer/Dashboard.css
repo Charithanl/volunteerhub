@@ -1,0 +1,213 @@
+.dashboard {
+  font-family: 'Poppins', sans-serif;
+  background: #f0f4f8;
+  min-height: 100vh;
+  padding: 1.5rem;
+  color: #1a1a2e;
+}
+
+/* ---- TOPBAR ---- */
+.topbar {
+  background: #fff;
+  border-radius: 14px;
+  padding: 0.9rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.brand { display: flex; align-items: center; gap: 9px; text-decoration: none; }
+.brand-dot {
+  width: 32px; height: 32px; border-radius: 9px;
+  background: #1a6fc4;
+  display: flex; align-items: center; justify-content: center;
+}
+.brand-dot svg { width: 18px; height: 18px; fill: #fff; }
+.brand-name { font-size: 15px; font-weight: 600; color: #1a1a2e; }
+
+nav { display: flex; gap: 4px; }
+nav a {
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: 7px;
+  color: #6b7280;
+  text-decoration: none;
+  transition: background 0.12s, color 0.12s;
+  font-weight: 500;
+}
+nav a:hover { background: #f3f4f6; color: #1a1a2e; }
+nav a.active { background: #e6f1fb; color: #1a6fc4; }
+
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.notif-btn {
+  width: 34px; height: 34px; border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; position: relative;
+}
+.notif-btn svg { width: 17px; height: 17px; fill: #6b7280; }
+.notif-badge {
+  position: absolute; top: 5px; right: 5px;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #ef4444;
+  border: 1.5px solid #fff;
+}
+.avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: #1a6fc4; color: #fff;
+  font-size: 12px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+
+/* ---- WELCOME BANNER ---- */
+.welcome {
+  background: linear-gradient(120deg, #0f4a8c 0%, #1a6fc4 55%, #2d9ee0 100%);
+  border-radius: 16px;
+  padding: 1.5rem 1.75rem;
+  color: #fff;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+  position: relative;
+}
+.welcome::before {
+  content: '';
+  position: absolute; right: -30px; top: -30px;
+  width: 160px; height: 160px; border-radius: 50%;
+  background: rgba(255,255,255,0.07);
+}
+.welcome::after {
+  content: '';
+  position: absolute; right: 50px; bottom: -40px;
+  width: 110px; height: 110px; border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+}
+.welcome-text h2 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+.welcome-text p  { font-size: 13px; opacity: 0.85; }
+.welcome-pill {
+  background: rgba(255,255,255,0.2);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ---- STATS ---- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+.stat-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.1rem 1.25rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+.stat-card .value { font-size: 26px; font-weight: 600; color: #1a1a2e; line-height: 1.15; }
+.stat-card .label { font-size: 12px; color: #6b7280; margin-top: 3px; }
+.badge {
+  display: inline-block;
+  font-size: 11px; font-weight: 500;
+  padding: 3px 9px;
+  border-radius: 20px;
+  margin-top: 8px;
+}
+.badge-blue   { background: #e6f1fb; color: #155da0; }
+.badge-green  { background: #d1fae5; color: #065f46; }
+.badge-amber  { background: #fef3c7; color: #92400e; }
+
+/* ---- SECTION HEADINGS ---- */
+.section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.section-head h3 { font-size: 15px; font-weight: 600; color: #1a1a2e; }
+.see-all { font-size: 12px; color: #1a6fc4; text-decoration: none; font-weight: 500; }
+
+/* ---- ACTION CARDS ---- */
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 1.75rem;
+}
+.action-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  cursor: pointer;
+  transition: box-shadow 0.15s, transform 0.12s;
+  text-decoration: none;
+  display: block;
+}
+.action-card:hover {
+  box-shadow: 0 6px 20px rgba(26,111,196,0.14);
+  transform: translateY(-2px);
+}
+.action-icon {
+  width: 40px; height: 40px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 12px;
+}
+.icon-blue   { background: #e6f1fb; }
+.icon-teal   { background: #d1fae5; }
+.icon-purple { background: #ede9fe; }
+.action-icon svg { width: 20px; height: 20px; }
+.action-card h4 { font-size: 14px; font-weight: 600; color: #1a1a2e; margin-bottom: 3px; }
+.action-card p  { font-size: 12px; color: #6b7280; }
+.arrow {
+  display: inline-block;
+  font-size: 16px;
+  color: #9ca3af;
+  margin-top: 10px;
+}
+
+/* ---- RECENT EVENTS TABLE ---- */
+.recent-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+.event-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+.event-row:last-child { border-bottom: none; padding-bottom: 0; }
+.event-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot-blue   { background: #1a6fc4; }
+.dot-green  { background: #059669; }
+.dot-amber  { background: #d97706; }
+.event-info { flex: 1; min-width: 0; }
+.event-name { font-size: 13px; font-weight: 500; color: #1a1a2e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.event-meta { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+.status-badge {
+  font-size: 11px; font-weight: 500;
+  padding: 4px 10px; border-radius: 20px;
+  white-space: nowrap;
+}
+.status-open    { background: #e6f1fb; color: #155da0; }
+.status-done    { background: #d1fae5; color: #065f46; }
+.status-pending { background: #fef3c7; color: #92400e; }
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 640px) {
+  .dashboard { padding: 1rem; }
+  .stats-grid  { grid-template-columns: 1fr 1fr; }
+  .action-grid { grid-template-columns: 1fr; }
+  nav { display: none; }
+  .welcome-pill { display: none; }
+}
