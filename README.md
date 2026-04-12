@@ -47,17 +47,16 @@ The deployed application currently demonstrates these working screens and flows:
   <img width="941" height="494" alt="image" src="https://github.com/user-attachments/assets/781e018f-c5ce-4da5-b732-4fb2ca9322f5" />
 
 - event details page
+  <img width="947" height="494" alt="image" src="https://github.com/user-attachments/assets/1daff920-1199-4a6b-bcb0-ed183f3062ee" />
+
 - event application flow
+  <img width="954" height="476" alt="image" src="https://github.com/user-attachments/assets/f83f50f6-6055-46cf-bfe2-824eb518de80" />
+
 - applications list with view and withdraw
-- profile page with backend-saved personal info and skills
+  <img width="954" height="498" alt="image" src="https://github.com/user-attachments/assets/3680d5b7-ca0d-4a0c-a726-2112ec9e9354" />
 
-Suggested screenshots for submission/demo:
+<img width="941" height="502" alt="image" src="https://github.com/user-attachments/assets/53ad6437-958d-496e-b41b-73badeccd577" />
 
-- dashboard page
-- event details page
-- applications page
-- profile page
-- skills management section
 
 ## Tech Stack
 
