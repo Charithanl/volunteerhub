@@ -44,6 +44,8 @@ VolunteerHub solves a simple but practical problem: volunteer coordination is of
 The deployed application currently demonstrates these working screens and flows:
 
 - dashboard overview
+  <img width="941" height="494" alt="image" src="https://github.com/user-attachments/assets/781e018f-c5ce-4da5-b732-4fb2ca9322f5" />
+
 - event details page
 - event application flow
 - applications list with view and withdraw
