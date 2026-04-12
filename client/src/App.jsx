@@ -7,6 +7,7 @@ import './App.css'
 const Dashboard = lazy(() => import('./pages/volunteer/Dashboard'))
 const EventDetails = lazy(() => import('./pages/volunteer/EventDetails'))
 const Applications = lazy(() => import('./pages/volunteer/Applications'))
+const ApplicationDetails = lazy(() => import('./pages/volunteer/ApplicationDetails'))
 const Profile = lazy(() => import('./pages/volunteer/Profile'))
 
 const LoadingFallback = () => (
@@ -27,6 +28,7 @@ const App = () => {
             <Route path="/" element={<Dashboard />} />
             <Route path="/event" element={<EventDetails />} />
             <Route path="/applications" element={<Applications />} />
+            <Route path="/applications/:applicationId" element={<ApplicationDetails />} />
             <Route path="/profile" element={<Profile />} />
           </Routes>
         </Suspense>
