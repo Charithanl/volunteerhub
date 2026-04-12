@@ -179,6 +179,7 @@ nav a.active { background: #e6f1fb; color: #1a6fc4; }
 }
 .btn-apply:hover  { background: #155da0; }
 .btn-apply:active { transform: scale(0.99); }
+.btn-apply:disabled { opacity: 0.7; cursor: not-allowed; }
 
 .btn-save {
   width: 100%; padding: 11px;

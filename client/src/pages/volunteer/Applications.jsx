@@ -1,10 +1,10 @@
 import React, { memo, useEffect, useMemo, useState } from 'react';
+import { useAuth } from '@clerk/react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import Topbar from '../../components/volunteer/Topbar';
-import {
-  APPLICATIONS_STORAGE_KEY,
-  getStoredApplications,
-} from '../../data/applications';
+import { applicationsApi } from '../../lib/api';
+import { formatDisplayDate, formatDuration } from '../../lib/formatters';
 import './Applications.css';
 
 const statusMap = {
@@ -29,29 +29,57 @@ const statusText = {
   rejected: 'Rejected',
 };
 
+const categoryPresentation = {
+  Environment: { icon: '🌳', colorBar: 'bar-green', colorBg: '#d1fae5' },
+  Health: { icon: '🏥', colorBar: 'bar-blue', colorBg: '#e0f2fe' },
+  Education: { icon: '📚', colorBar: 'bar-amber', colorBg: '#fef3c7' },
+  'Food & Nutrition': { icon: '🍱', colorBar: 'bar-blue', colorBg: '#e6f1fb' },
+  'Arts & Culture': { icon: '🎨', colorBar: 'bar-red', colorBg: '#fee2e2' },
+};
+
+const mapApplicationToCard = (application) => {
+  const event = application.event || {};
+  const visual = categoryPresentation[event.category] || { icon: '📅', colorBar: 'bar-blue', colorBg: '#e6f1fb' };
+  const normalizedStatus = application.status?.toLowerCase() || 'pending';
+
+  return {
+    id: application.id,
+    title: event.title || 'Untitled event',
+    org: event.organization?.name || 'Organization',
+    date: formatDisplayDate(event.date),
+    location: event.location || 'Location TBD',
+    hours: formatDuration(event.startTime, event.endTime) || 'Schedule TBD',
+    status: normalizedStatus,
+    icon: visual.icon,
+    colorBar: visual.colorBar,
+    colorBg: visual.colorBg,
+  };
+};
+
 const Applications = () => {
+  const { getToken, isLoaded: authLoaded, isSignedIn } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [applications, setApplications] = useState(() => getStoredApplications());
+  const [applications, setApplications] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [withdrawingId, setWithdrawingId] = useState('');
 
   useEffect(() => {
-    window.localStorage.setItem(APPLICATIONS_STORAGE_KEY, JSON.stringify(applications));
-  }, [applications]);
-
-  useEffect(() => {
-    if (!feedbackMessage) {
+    if (!feedbackMessage && !errorMessage) {
       return undefined;
     }
 
     const timer = window.setTimeout(() => {
       setFeedbackMessage('');
-    }, 2500);
+      setErrorMessage('');
+    }, 3000);
 
     return () => window.clearTimeout(timer);
-  }, [feedbackMessage]);
+  }, [errorMessage, feedbackMessage]);
 
   useEffect(() => {
     if (!location.state?.feedbackMessage) {
@@ -61,6 +89,51 @@ const Applications = () => {
     setFeedbackMessage(location.state.feedbackMessage);
     navigate(location.pathname, { replace: true, state: null });
   }, [location.pathname, location.state, navigate]);
+
+  useEffect(() => {
+    if (!authLoaded) {
+      return;
+    }
+
+    let ignore = false;
+
+    const loadApplications = async () => {
+      setIsLoading(true);
+      setErrorMessage('');
+
+      if (!isSignedIn) {
+        if (!ignore) {
+          setApplications([]);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      try {
+        const token = await getToken();
+        const response = await applicationsApi.listMyApplications(token);
+
+        if (!ignore) {
+          setApplications((response.applications || []).map(mapApplicationToCard));
+        }
+      } catch (error) {
+        if (!ignore) {
+          setErrorMessage(error.message || 'Unable to load your applications right now.');
+          setApplications([]);
+        }
+      } finally {
+        if (!ignore) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadApplications();
+
+    return () => {
+      ignore = true;
+    };
+  }, [authLoaded, getToken, isSignedIn]);
 
   const filteredApps = useMemo(() => {
     return applications
@@ -84,14 +157,29 @@ const Applications = () => {
     return { total: applications.length, approved, pending, attended, rejected };
   }, [applications]);
 
-  const handleWithdraw = (applicationId) => {
+  const handleWithdraw = async (applicationId) => {
+    if (!isSignedIn) {
+      setErrorMessage('Sign in to manage your applications.');
+      return;
+    }
+
     const applicationToRemove = applications.find((app) => app.id === applicationId);
     if (!applicationToRemove) {
       return;
     }
 
-    setApplications((current) => current.filter((app) => app.id !== applicationId));
-    setFeedbackMessage(`${applicationToRemove.title} has been withdrawn.`);
+    try {
+      setWithdrawingId(applicationId);
+      const token = await getToken();
+      await applicationsApi.withdrawMyApplication(applicationId, token);
+      setApplications((current) => current.filter((app) => app.id !== applicationId));
+      setFeedbackMessage(`${applicationToRemove.title} has been withdrawn.`);
+      setErrorMessage('');
+    } catch (error) {
+      setErrorMessage(error.message || 'Unable to withdraw this application right now.');
+    } finally {
+      setWithdrawingId('');
+    }
   };
 
   return (
@@ -109,11 +197,13 @@ const Applications = () => {
         </Link>
       </div>
 
-      {feedbackMessage && (
-        <div className="applications-feedback" role="status" aria-live="polite">
-          {feedbackMessage}
+      {(feedbackMessage || errorMessage) && (
+        <div className={`applications-feedback ${errorMessage ? 'is-error' : ''}`} role="status" aria-live="polite">
+          {errorMessage || feedbackMessage}
         </div>
       )}
+
+      {isLoading && <LoadingSpinner message="Loading your applications..." />}
 
       <div className="stats-row">
         <div className="stat-card">
@@ -187,8 +277,8 @@ const Applications = () => {
         {filteredApps.length === 0 ? (
           <div className="empty-state">
             <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z" /></svg>
-            <h3>No applications found</h3>
-            <p>Try a different filter or search term</p>
+            <h3>{isSignedIn ? 'No applications found' : 'Sign in to view your applications'}</h3>
+            <p>{isSignedIn ? 'Apply to an event to see it here.' : 'Your applications will appear here after you sign in and apply to an event.'}</p>
           </div>
         ) : (
           filteredApps.map((app) => (
@@ -222,8 +312,9 @@ const Applications = () => {
                       className="btn-sm btn-danger-sm"
                       onClick={() => handleWithdraw(app.id)}
                       aria-label={`Withdraw ${app.title}`}
+                      disabled={withdrawingId === app.id}
                     >
-                      Withdraw
+                      {withdrawingId === app.id ? 'Withdrawing...' : 'Withdraw'}
                     </button>
                   ) : null}
                 </div>

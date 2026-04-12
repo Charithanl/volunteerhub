@@ -24,6 +24,7 @@ nav a.active { background: #e6f1fb; color: #1a6fc4; }
 .btn-browse svg { width: 15px; height: 15px; fill: #fff; }
 
 .applications-feedback { margin-bottom: 1rem; padding: 0.85rem 1rem; border-radius: 12px; background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; font-size: 13px; font-weight: 500; }
+.applications-feedback.is-error { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
 
 .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.5rem; }
 .stat-card { background: #fff; border-radius: 13px; padding: 1rem 1.2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 12px; }
@@ -72,6 +73,7 @@ nav a.active { background: #e6f1fb; color: #1a6fc4; }
 .pill-rejected { background: #fee2e2; color: #991b1b; }
 .app-actions { display: flex; gap: 6px; }
 .btn-sm { padding: 6px 13px; border-radius: 7px; font-size: 12px; font-weight: 500; font-family: 'Poppins', sans-serif; cursor: pointer; transition: all 0.12s; }
+.btn-sm:disabled { opacity: 0.7; cursor: not-allowed; }
 .btn-outline-sm { border: 1px solid #e5e7eb; background: #fff; color: #374151; }
 .btn-outline-sm:hover { border-color: #9ca3af; background: #f9fafb; }
 .btn-danger-sm { border: 1px solid #fecaca; background: #fff; color: #dc2626; }

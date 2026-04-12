@@ -1,29 +1,11 @@
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { useAuth, useUser } from '@clerk/react';
 import { Link } from 'react-router-dom';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import Topbar from '../../components/volunteer/Topbar';
+import { profileApi } from '../../lib/api';
+import { createProfileFromClerkUser, defaultProfile, normalizeProfileForUi } from '../../lib/profile';
 import './Profile.css';
-
-const PROFILE_STORAGE_KEY = 'volunteerhub-profile';
-
-const defaultProfile = {
-  firstName: 'Charitha',
-  lastName: 'NL',
-  email: 'nlcharitha@gmail.com',
-  phone: '+91 9036XXXXXX',
-  location: 'Bengaluru, Karnataka',
-  memberSince: 'Jan 2025',
-  education: 'B.Tech CSE, 3rd Year',
-  bio: 'Passionate about community development and environmental causes. Final year CSE student looking to make a positive impact through volunteering. I believe that small acts of kindness can create big ripples of change.',
-  skills: [
-    'Teamwork',
-    'First Aid',
-    'Teaching',
-    'Event Planning',
-    'Communication',
-    'Photography',
-    'Data Entry',
-  ],
-};
 
 const skillPaletteClasses = [
   'chip-blue',
@@ -33,83 +15,139 @@ const skillPaletteClasses = [
   'chip-coral',
 ];
 
-const readStoredProfile = () => {
-  if (typeof window === 'undefined') {
-    return defaultProfile;
-  }
-
-  try {
-    const storedProfile = window.localStorage.getItem(PROFILE_STORAGE_KEY);
-
-    if (!storedProfile) {
-      return defaultProfile;
-    }
-
-    const parsedProfile = JSON.parse(storedProfile);
-
-    return {
-      ...defaultProfile,
-      ...parsedProfile,
-      skills: Array.isArray(parsedProfile.skills) && parsedProfile.skills.length > 0
-        ? parsedProfile.skills
-        : defaultProfile.skills,
-    };
-  } catch {
-    return defaultProfile;
-  }
-};
-
-const sanitizeProfile = (profile) => ({
-  ...profile,
-  firstName: profile.firstName.trim() || defaultProfile.firstName,
-  lastName: profile.lastName.trim() || defaultProfile.lastName,
-  email: profile.email.trim() || defaultProfile.email,
-  phone: profile.phone.trim() || defaultProfile.phone,
-  location: profile.location.trim() || defaultProfile.location,
-  education: profile.education.trim() || defaultProfile.education,
-  bio: profile.bio.trim() || defaultProfile.bio,
+const sanitizeProfile = (profile, fallbackProfile) => ({
+  firstName: profile.firstName.trim() || fallbackProfile.firstName,
+  lastName: profile.lastName.trim() || fallbackProfile.lastName,
+  email: profile.email.trim() || fallbackProfile.email,
+  phone: profile.phone.trim(),
+  location: profile.location.trim() || fallbackProfile.location,
+  education: profile.education.trim() || fallbackProfile.education,
+  bio: profile.bio.trim() || fallbackProfile.bio,
+  memberSince: profile.memberSince || fallbackProfile.memberSince,
+  skills: Array.isArray(profile.skills) && profile.skills.length > 0 ? profile.skills : fallbackProfile.skills,
 });
 
 const Profile = () => {
-  const [profile, setProfile] = useState(() => readStoredProfile());
-  const [formData, setFormData] = useState(() => readStoredProfile());
+  const { getToken, isLoaded: authLoaded, isSignedIn } = useAuth();
+  const { user, isLoaded: userLoaded } = useUser();
+  const skillInputRef = useRef(null);
+  const fallbackProfile = useMemo(() => createProfileFromClerkUser(user), [user]);
+
+  const [profile, setProfile] = useState(defaultProfile);
+  const [formData, setFormData] = useState(defaultProfile);
   const [editMode, setEditMode] = useState(false);
   const [newSkill, setNewSkill] = useState('');
   const [saveMessage, setSaveMessage] = useState('');
-  const [skillError, setSkillError] = useState('');
-  const skillInputRef = useRef(null);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isProfileLoading, setIsProfileLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    window.localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
-  }, [profile]);
-
-  useEffect(() => {
-    if (!saveMessage && !skillError) {
+    if (!saveMessage && !errorMessage) {
       return undefined;
     }
 
     const timer = window.setTimeout(() => {
       setSaveMessage('');
-      setSkillError('');
-    }, 2500);
+      setErrorMessage('');
+    }, 3000);
 
     return () => window.clearTimeout(timer);
-  }, [saveMessage, skillError]);
+  }, [saveMessage, errorMessage]);
+
+  useEffect(() => {
+    if (!authLoaded || !userLoaded) {
+      return;
+    }
+
+    let ignore = false;
+
+    const loadProfile = async () => {
+      setIsProfileLoading(true);
+      setErrorMessage('');
+
+      if (!isSignedIn) {
+        if (!ignore) {
+          setProfile(fallbackProfile);
+          setFormData(fallbackProfile);
+          setIsProfileLoading(false);
+        }
+        return;
+      }
+
+      try {
+        const token = await getToken();
+        const response = await profileApi.getMyProfile(token);
+        const resolvedProfile = response.profile
+          ? normalizeProfileForUi(response.profile, fallbackProfile)
+          : fallbackProfile;
+
+        if (!ignore) {
+          setProfile(resolvedProfile);
+          setFormData(resolvedProfile);
+        }
+      } catch (error) {
+        if (!ignore) {
+          setProfile(fallbackProfile);
+          setFormData(fallbackProfile);
+          setErrorMessage(error.message || 'Unable to load your profile right now.');
+        }
+      } finally {
+        if (!ignore) {
+          setIsProfileLoading(false);
+        }
+      }
+    };
+
+    loadProfile();
+
+    return () => {
+      ignore = true;
+    };
+  }, [authLoaded, fallbackProfile, getToken, isSignedIn, userLoaded]);
 
   const fullName = useMemo(
-    () => `${profile.firstName} ${profile.lastName}`.trim(),
+    () => `${profile.firstName} ${profile.lastName}`.trim() || 'Volunteer',
     [profile.firstName, profile.lastName],
   );
 
   const initials = useMemo(() => {
-    return `${profile.firstName?.[0] || ''}${profile.lastName?.[0] || ''}`.toUpperCase() || 'V';
+    const resolvedInitials = `${profile.firstName?.[0] || ''}${profile.lastName?.[0] || ''}`.toUpperCase();
+    return resolvedInitials || 'V';
   }, [profile.firstName, profile.lastName]);
+
+  const persistProfile = async (nextProfile, successMessage) => {
+    if (!isSignedIn) {
+      setErrorMessage('Sign in to save profile changes.');
+      return false;
+    }
+
+    try {
+      setIsSaving(true);
+      const token = await getToken();
+      const payload = sanitizeProfile(nextProfile, fallbackProfile);
+      const response = await profileApi.saveMyProfile(token, payload);
+      const resolvedProfile = normalizeProfileForUi(response.profile, fallbackProfile);
+
+      setProfile(resolvedProfile);
+      setFormData(resolvedProfile);
+      setSaveMessage(successMessage);
+      setErrorMessage('');
+
+      return true;
+    } catch (error) {
+      setErrorMessage(error.message || 'Unable to save your profile right now.');
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const startEditing = () => {
     setFormData(profile);
     setEditMode(true);
     setSaveMessage('');
-    setSkillError('');
+    setErrorMessage('');
   };
 
   const cancelEditing = () => {
@@ -125,56 +163,74 @@ const Profile = () => {
     }));
   };
 
-  const handleSaveProfile = () => {
-    const updatedProfile = sanitizeProfile(formData);
-    setProfile(updatedProfile);
-    setFormData(updatedProfile);
-    setEditMode(false);
-    setSaveMessage('Profile updated successfully.');
+  const handleSaveProfile = async () => {
+    const updatedProfile = sanitizeProfile(formData, fallbackProfile);
+    const saved = await persistProfile(updatedProfile, 'Profile updated successfully.');
+
+    if (saved) {
+      setEditMode(false);
+    }
   };
 
-  const handleAddSkill = () => {
+  const handleAddSkill = async () => {
     const trimmedSkill = newSkill.trim();
 
     if (!trimmedSkill) {
-      setSkillError('Enter a skill before adding it.');
+      setErrorMessage('Enter a skill before adding it.');
       return;
     }
 
     if (profile.skills.some((skill) => skill.toLowerCase() === trimmedSkill.toLowerCase())) {
-      setSkillError('That skill is already listed.');
+      setErrorMessage('That skill is already listed.');
       return;
     }
 
-    const nextSkills = [...profile.skills, trimmedSkill];
+    const previousProfile = profile;
+    const nextProfile = {
+      ...profile,
+      skills: [...profile.skills, trimmedSkill],
+    };
 
-    setProfile((current) => ({
-      ...current,
-      skills: nextSkills,
-    }));
-    setFormData((current) => ({
-      ...current,
-      skills: nextSkills,
-    }));
+    setProfile(nextProfile);
+    setFormData(nextProfile);
     setNewSkill('');
-    setSkillError('');
-    setSaveMessage(`Added ${trimmedSkill}.`);
-    skillInputRef.current?.focus();
+
+    const saved = await persistProfile(nextProfile, `Added ${trimmedSkill}.`);
+
+    if (!saved) {
+      setProfile(previousProfile);
+      setFormData(previousProfile);
+    } else {
+      skillInputRef.current?.focus();
+    }
   };
 
-  const handleRemoveSkill = (skillToRemove) => {
-    const nextSkills = profile.skills.filter((skill) => skill !== skillToRemove);
+  const handleRemoveSkill = async (skillToRemove) => {
+    const previousProfile = profile;
+    const nextProfile = {
+      ...profile,
+      skills: profile.skills.filter((skill) => skill !== skillToRemove),
+    };
 
-    setProfile((current) => ({
-      ...current,
-      skills: nextSkills,
-    }));
-    setFormData((current) => ({
-      ...current,
-      skills: nextSkills,
-    }));
-    setSaveMessage(`Removed ${skillToRemove}.`);
+    setProfile(nextProfile);
+    setFormData(nextProfile);
+
+    const saved = await persistProfile(nextProfile, `Removed ${skillToRemove}.`);
+
+    if (!saved) {
+      setProfile(previousProfile);
+      setFormData(previousProfile);
+    }
   };
+
+  if (isProfileLoading) {
+    return (
+      <div className="profile-page">
+        <Topbar active="profile" />
+        <LoadingSpinner message="Loading your profile..." />
+      </div>
+    );
+  }
 
   return (
     <div className="profile-page">
@@ -220,9 +276,9 @@ const Profile = () => {
         </div>
       </div>
 
-      {(saveMessage || skillError) && (
-        <div className={`profile-feedback ${skillError ? 'is-error' : 'is-success'}`} role="status" aria-live="polite">
-          {skillError || saveMessage}
+      {(saveMessage || errorMessage) && (
+        <div className={`profile-feedback ${errorMessage ? 'is-error' : 'is-success'}`} role="status" aria-live="polite">
+          {errorMessage || saveMessage}
         </div>
       )}
 
@@ -235,10 +291,10 @@ const Profile = () => {
                 {editMode ? 'Cancel' : 'Edit'}
               </button>
             </div>
-            <div className="info-row"><span className="info-lbl">Email</span><span className="info-val">{profile.email}</span></div>
-            <div className="info-row"><span className="info-lbl">Phone</span><span className="info-val">{profile.phone}</span></div>
+            <div className="info-row"><span className="info-lbl">Email</span><span className="info-val">{profile.email || 'Add your email'}</span></div>
+            <div className="info-row"><span className="info-lbl">Phone</span><span className="info-val">{profile.phone || 'Add your phone number'}</span></div>
             <div className="info-row"><span className="info-lbl">Location</span><span className="info-val">{profile.location}</span></div>
-            <div className="info-row"><span className="info-lbl">Member since</span><span className="info-val">{profile.memberSince}</span></div>
+            <div className="info-row"><span className="info-lbl">Member since</span><span className="info-val">{profile.memberSince || 'Will appear after first save'}</span></div>
             <div className="info-row"><span className="info-lbl">Education</span><span className="info-val">{profile.education}</span></div>
           </div>
 
@@ -261,6 +317,7 @@ const Profile = () => {
                     className="skill-remove-btn"
                     onClick={() => handleRemoveSkill(skill)}
                     aria-label={`Remove ${skill}`}
+                    disabled={isSaving}
                   >
                     ×
                   </button>
@@ -283,7 +340,7 @@ const Profile = () => {
                 }}
                 aria-label="Add a new skill"
               />
-              <button type="button" className="add-skill-btn" onClick={handleAddSkill}>
+              <button type="button" className="add-skill-btn" onClick={handleAddSkill} disabled={isSaving}>
                 + Add skill
               </button>
             </div>
@@ -350,7 +407,9 @@ const Profile = () => {
               </div>
               <div className="profile-form-actions">
                 <button className="secondary-btn" type="button" onClick={cancelEditing}>Cancel</button>
-                <button className="save-btn" type="button" onClick={handleSaveProfile}>Save changes</button>
+                <button className="save-btn" type="button" onClick={handleSaveProfile} disabled={isSaving}>
+                  {isSaving ? 'Saving...' : 'Save changes'}
+                </button>
               </div>
             </div>
           ) : (
