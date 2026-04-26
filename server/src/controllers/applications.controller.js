@@ -48,6 +48,24 @@ export const listMyApplications = async (request, response) => {
   });
 };
 
+export const listApplications = async (_request, response) => {
+  const applications = await prisma.application.findMany({
+    where: {
+      status: {
+        not: ApplicationStatus.WITHDRAWN,
+      },
+    },
+    include: applicationInclude,
+    orderBy: {
+      appliedAt: 'desc',
+    },
+  });
+
+  response.json({
+    applications: applications.map(serializeApplication),
+  });
+};
+
 export const getMyApplicationById = async (request, response) => {
   const user = await getCurrentUser(request);
 
